@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="curvesapi-1.06">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/Apache POI/poi-bin-5.1.0/ooxml-lib/curvesapi-1.06.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Apache POI/poi-bin-5.1.0/ooxml-lib/slf4j-api-1.7.32.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Apache POI/poi-bin-5.1.0/ooxml-lib/xmlbeans-5.0.2.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Apache POI/poi-bin-5.1.0/ooxml-lib/commons-compress-1.21.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/Apache POI/poi-bin-5.1.0/ooxml-lib/commons-logging-1.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
