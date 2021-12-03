@@ -125,9 +125,15 @@ public class Employee_Dashboard extends Copy_of_Admin_Dashboard{
                             int minute_limit = 0;
                             int current_minute = 0;
                             int minute;
-                            if (hour == hour_limit){
+                            if (hour == hour_limit && LocalTime.now().getHour() == hour){
                                 minute_limit = start.getMinute();
                                 current_minute = LocalTime.now().getMinute();
+                                System.out.print("Enter Minute (" + minute_limit + "-" + current_minute + "): ");
+                                minute = get_valid_int_response(minute_limit, current_minute);
+                            }
+                            else if (hour == hour_limit){
+                                minute_limit = start.getMinute();
+                                current_minute = 59;
                                 System.out.print("Enter Minute (" + minute_limit + "-" + current_minute + "): ");
                                 minute = get_valid_int_response(minute_limit, current_minute);
                             }

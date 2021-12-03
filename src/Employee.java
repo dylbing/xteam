@@ -206,11 +206,12 @@ public class Employee extends Copy_of_Admin_Dashboard{
                         d++;
                         meal_start = (LocalTime)punch_log.get(d);
                         d++;
-                        if ("MEAL END".equals((LocalTime)punch_log.get(d))){
-                            meal_end = (LocalTime)punch_log.get(d);
-                            total_time -= ChronoUnit.MINUTES.between(meal_start, meal_end);
-                        }
-
+                        try {
+                            if ("MEAL END".equals((LocalTime)punch_log.get(d))){
+                                meal_end = (LocalTime)punch_log.get(d);
+                                total_time -= ChronoUnit.MINUTES.between(meal_start, meal_end);
+                            }
+                        }catch (Exception e){}
                     }
                 }
             }
