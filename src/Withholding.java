@@ -20,11 +20,8 @@ public class Withholding extends Payroll_Calculations{
     private static double medicare_withholding;
     private static double earned_pre_tax_ytd = 0;
     private static double earned_post_tax_ytd = 0;
-    private static double[] unpayable_deductions = new double[10];
-    private static double[] additional_deductions_pre_tax = new double[10];
-    private static String[] pre_tax_deduct_name = new String[10];
-    private static String[] post_tax_deduct_name = new String[10];
-    private static double[] additional_deductions_post_tax = new double[10];
+    //private static double[] unpayable_deductions = new double[10];
+    private static ArrayList<Object> pay_summary = new ArrayList<Object>();
     private static int add_pre_tax_count = 0;
     private static int add_post_tax_count = 0;
     private static double net_pay = 0;
@@ -33,150 +30,131 @@ public class Withholding extends Payroll_Calculations{
     private static int payroll_history_count = 0;
     private Object[] temp_storage = new Object[15];
     private static Employee object;
+    private float overtime_multiplier = 1.5f;
+    private int salary_work_week = 40;
 
     Withholding(Employee object) throws NoSuchAlgorithmException, InterruptedException {
         super();
         this.object = object;
     }
+    public void print_paystub(){
+        System.out.println("Pay Period ended: "); // TODO add date in here when figured out
+
+        for (int i = 0; i < pay_summary.size(); i++){
+
+        }
+    }
     public void calculate_withholding(){
-        if (earned_post_tax_ytd > social_security_threshold){
+        adjust_gross();
+        if ((earned_post_tax_ytd) > social_security_threshold){
             social_security_withholding = gross_pay * social_security_rate;
         }
+        else if ((earned_post_tax_ytd + gross_pay) > social_security_withholding){
+            social_security_withholding = social_security_rate * (social_security_threshold - earned_pre_tax_ytd);
+        }
+        else
+            social_security_withholding = social_security_rate * gross_pay;
         medicare_withholding = gross_pay * medicare_rate;
         net_pay = gross_pay - social_security_withholding - medicare_withholding - federal_withholding - state_withholding;
-        if (add_post_tax_count > 0){
-            for (int i = 0; i < additional_deductions_post_tax.length; i++){
-                if ((net_pay - additional_deductions_post_tax[i]) >= 0)
-                    net_pay = net_pay - additional_deductions_post_tax[i];
-                else {
-
-                }
-            }
-        }
     }
-    public void adjust_gross(double gross_wage){
-        //gross_pay =
-        for (int i = 0; i < additional_deductions_pre_tax.length; i++){
-            gross_pay = gross_pay - additional_deductions_pre_tax[i];
+    public void adjust_gross(){
+        float overtime_hours = 0;
+        float pre_tax_deductions = 0;
+        float pre_tax_gifts = 0;
+        if (!object.get_salary_or_hourly()){
+            gross_pay = object.calculate_hours_worked(null, null);
+            if (gross_pay > 40){
+                overtime_hours = (float)(gross_pay - 40);
+                gross_pay = gross_pay - overtime_hours;
+            }
+            gross_pay = (gross_pay * object.get_salary()) + (overtime_hours * object.get_salary()
+                    * overtime_multiplier); //TODO make the
         }
+        else{
+            gross_pay = salary_work_week * object.get_salary();
+        }
+        for (int i = 0; i < pay_summary.size(); i++){
+            if (pay_summary.get(i) == "PRE TAX GIFT")
+                pre_tax_gifts = (float) (pay_summary.get(i + 2));
+            else if (pay_summary.get(i) == "PRE TAX DEDUCTION")
+                pre_tax_deductions = (float) (gross_pay - (gross_pay * ((float)pay_summary.get(i + 2))));
+        }
+        gross_pay += pre_tax_gifts;
+        gross_pay -= pre_tax_deductions;
     }
     public void add_pre_tax_deduction(String title, double amount){
-        pre_tax_deduct_name[add_pre_tax_count] = title;
-        additional_deductions_pre_tax[add_pre_tax_count] = amount;
-        add_pre_tax_count++;
+        amount = amount / 100;
+        pay_summary.add("PRE TAX DEDUCTION");
+        pay_summary.add(title);
+        pay_summary.add(amount);
+        System.out.println("Successfully added pre tax deduction: " + title + " in the amount of: " + amount * 100 + "%");
     }
     public void add_post_tax_deduction(String title, double amount){
-        post_tax_deduct_name[add_post_tax_count] = title;
-        additional_deductions_post_tax[add_post_tax_count] = amount;
-        add_post_tax_count++;
+        amount = amount / 100;
+        pay_summary.add("POST TAX DEDUCTION");
+        pay_summary.add(title);
+        pay_summary.add(amount);
+        System.out.println("Successfully added post tax deduction: " + title + " in the amount of: " + amount * 100 + "%");
     }
-    public boolean delete_pre_tax_deduct(String title, double amount){
-        int index = -1;
-        for (int i = 0; i < add_post_tax_count; i++){
-            if (additional_deductions_pre_tax[i] == amount &&
-                    Objects.equals(pre_tax_deduct_name[i], title)){
-                index = i;
-            }
-        }
-        if (index != -1){
-            for (int i = index; i < get_user_index(); i++){
-                additional_deductions_pre_tax[i] = additional_deductions_pre_tax[i + 1];
-            }
-            if (add_pre_tax_count == 1){
-                add_pre_tax_count--;
-            }
-            return true;
-        }
-        else
-            return false;
-    }
-    public boolean delete_post_tax_deduct(String title, double amount){
-        int index = -1;
-        for (int i = 0; i < add_post_tax_count; i++){
-            if (additional_deductions_post_tax[i] == amount &&
-                    Objects.equals(post_tax_deduct_name[i], title)){
-                index = i;
-            }
-        }
-        if (index != -1){
-            for (int i = index; i < index; i++){
-                additional_deductions_post_tax[i] = additional_deductions_post_tax[i + 1];
-                post_tax_deduct_name[i] = post_tax_deduct_name[i + 1];
-            }
-            if (add_post_tax_count == 1){
-                add_post_tax_count--;
-            }
-            return true;
-        }
-        else
-            return false;
+    public void delete_deduction(int index){
+        pay_summary.remove(index);
+        pay_summary.remove(index + 1);
+        pay_summary.remove(index + 2);
+        System.out.println("Deduction has successfully been deleted.");
     }
     public void add_pre_tax_gift(String title, double amount){
-
+        pay_summary.add("PRE TAX GIFT");
+        pay_summary.add(title);
+        pay_summary.add(amount);
+        System.out.println("Successfully added pre tax gift: " + title + " in the amount of: " + amount + ".");
     }
     public void add_post_tax_gift(String title, double amount){
-
+        pay_summary.add("POST TAX GIFT");
+        pay_summary.add(title);
+        pay_summary.add(amount);
+        System.out.println("Successfully added post tax gift: " + title + " in the amount of: " + amount + ".");
     }
-
-    public void delete_gift(String title, double amount){
-
+    public void delete_gift(int index){
+        pay_summary.remove(index);
+        pay_summary.remove(index + 1);
+        pay_summary.remove(index + 2);
+        System.out.println("Gift/Bonus has successfully been deleted.");
     }
-    public void print_extra_deduction_information(){
-        System.out.println("Pre-Tax Deductions");
-        System.out.println("Deduction     Amount");
-        System.out.println("-------------------");
-        for (int i = 0; i < add_pre_tax_count; i++){
-            System.out.println("[" + i + "]" + pre_tax_deduct_name[i] + "  " +
-                    additional_deductions_pre_tax[i]);
+    public ArrayList<Integer> print_extra_deduction_information(){
+        System.out.println("DEDUCTION TYPE   TITLE   AMOUNT");
+        ArrayList<Integer> valid_numbers = new ArrayList<Integer>();
+        for (int i = 0; i < pay_summary.size(); i++){
+            if (pay_summary.get(i) == "PRE TAX DEDUCTION"){
+                valid_numbers.add(i);
+                i++;
+                System.out.println("(" + (i-1) + ")  PRE TAX DEDUCTION: " + pay_summary.get(i) + " " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "POST TAX DEDUCTION"){
+                valid_numbers.add(i);
+                i++;
+                System.out.println("(" + (i-1) + ") POST TAX DEDUCTION " + pay_summary.get(i) + " " + pay_summary.get(i + 1));
+            }
         }
-        System.out.println("Post-Tax Deductions");
-        System.out.println("Deduction     Amount");
-        System.out.println("-------------------");
-        for (int i = 0; i < add_post_tax_count; i++){
-            System.out.println("[" + i + "]" + post_tax_deduct_name[i] + " " +
-                    additional_deductions_post_tax[i]);
-        }
+        return valid_numbers;
     }
-    public void store_to_history(){
-        Calendar cal = Calendar.getInstance();
-        temp_storage[0] = cal.getTime();
-        temp_storage[1] = gross_pay;
-        temp_storage[2] = state_withholding;
-        temp_storage[3] = federal_withholding;
-        temp_storage[4] = social_security_withholding;
-        temp_storage[5] = medicare_withholding;
-        temp_storage[6] = withholding_amount;
-        if (add_pre_tax_count == 0 && add_post_tax_count == 0){
-            temp_storage[7] = net_pay;
+    public ArrayList<Integer> print_gift_information(){
+        ArrayList<Integer> valid_numbers = new ArrayList<Integer>();
+        System.out.println("GIFT TYPE  TITLE  AMOUNT");
+        for (int i = 0; i < pay_summary.size(); i++){
+            if (pay_summary.get(i) == "PRE TAX GIFT"){
+                valid_numbers.add(i);
+                i++;
+                System.out.println("(" + (i-1) + ")  PRE TAX GIFT: " + pay_summary.get(i) + " " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "POST TAX GIFT"){
+                valid_numbers.add(i);
+                i++;
+                System.out.println("(" + (i-1) + ") POST TAX GIFT " + pay_summary.get(i) + " " + pay_summary.get(i + 1));
+            }
         }
-        else
-            if (add_pre_tax_count > 0 && add_post_tax_count > 0){
-                for (int i = 0; i < add_pre_tax_count; i++){
-                    temp_storage[i + 7] = additional_deductions_pre_tax[i];
-                    spaces_past_normal++;
-                }
-                for (int x = 0; x < add_post_tax_count; x++){
-                    temp_storage[x + 7 + spaces_past_normal] = additional_deductions_post_tax[x]; // TODO check this, it may be one off
-                    spaces_past_normal++;
-                }
-                temp_storage[spaces_past_normal + 7] = net_pay;
-            }
-            else if (add_pre_tax_count > 0 && add_post_tax_count <= 0){
-                for (int i = 0; i < add_pre_tax_count; i++){
-                    temp_storage[i + 7] = additional_deductions_pre_tax[i];
-                    spaces_past_normal++;
-                }
-                temp_storage[spaces_past_normal + 7] = net_pay;
-            }
-            else{
-                for (int x = 0; x < add_post_tax_count; x++){
-                    temp_storage[x + 7 + spaces_past_normal] = additional_deductions_post_tax[x]; // TODO check this, it may be one off
-                    spaces_past_normal++;
-                }
-                temp_storage[spaces_past_normal + 7] = net_pay;
-            }
-            temp_storage[temp_storage.length + 1] = spaces_past_normal;
-            history.add(temp_storage);
+        return valid_numbers;
     }
     public static void get_excel_data(String withholding_type, String civil_status, String frequency) throws IOException {
         String excelFilePath = "";

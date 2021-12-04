@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -26,7 +27,7 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
         this.employees = employees;
     }
 
-    public void menu() throws IOException, InterruptedException {
+    public void menu() throws IOException, InterruptedException, NoSuchAlgorithmException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("What would you like to do?");
         System.out.println("[1] Process Payroll Calculations for all Employees");
@@ -39,8 +40,9 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
         System.out.println("[8] Add Gift / Bonus");
         System.out.println("[9] Delete Deduction");
         System.out.println("[10] Delete Gift");
+        System.out.println("[11] Return to Menu");
         System.out.print("Enter a number corresponding to the operation you would like to perform: ");
-        int selection = get_valid_int_response(1, 9);
+        int selection = get_valid_int_response(1, 11);
         switch(selection){
             case 1:
                 process_all_payroll();
@@ -71,13 +73,15 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
                 menu();
             case 10:
                 //delete_gift();
-
+            case 11:
+                this.Menu();
+                break;
         }
-
     }
     public void process_all_payroll() throws IOException {
+        System.out.print("Enter the pay_period you would like to process payroll for: ");
         for (int i = 0; i < employees.length; i++){
-
+            employees[i].get_withholding_object().calculate_withholding();
             employees[i].get_withholding_object().get_excel_data("State", employees[i].get_marital_status(), frequency);
             employees[i].get_withholding_object().get_excel_data("Federal", employees[i].get_marital_status(), frequency);
         }
@@ -138,140 +142,85 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
             set_social_security_rate();
     }
     public void add_deduction() throws InterruptedException {
-        int index = -1;
-        System.out.print("Enter \"O\" to add a deduction for one employee, or \"A\" to add" +
-                " a deduction for all employees: ");
         Scanner scanner = new Scanner(System.in);
-        String response = get_valid_letter_response("O", "A");
-        System.out.print("Enter \"A\" for pre tax deduction or \"B\" for post tax deduction: ");
-        String type = get_valid_letter_response("A", "B");
-        System.out.print("Enter the name of the deduction: ");
-        String title = scanner.nextLine();
-        System.out.print("Enter the amount to be withheld every pay period: ");
-        double amount = get_valid_double_response();
-        if (Objects.equals("O", response)){
-            System.out.print("Enter the name of the employee: ");
-            scanner.nextLine();
-            String name = scanner.nextLine();
-            name = name.toUpperCase();
-            for (int i = 0; i < get_user_count(); i++){
-                if (Objects.equals(name, employees[i].get_user()))
-                    index = i;
-            }
-            if (index >= 0){
-
-                if (Objects.equals(type, "A"))
-                    employees[index].get_withholding_object().add_pre_tax_deduction(title, amount);
-                else
-                    employees[index].get_withholding_object().add_post_tax_deduction(title, amount);
-                System.out.println("Operation performed successfully.");
-                Thread.sleep(1500);
-            }
-            else
-                System.out.println("User not found.");
+        for (int i = 0; i < employees.length; i++){
+            System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
         }
-        else{
-            for (int i = 0; i < employees.length; i++){
-                if (Objects.equals(type, "A"))
-                    employees[i].get_withholding_object().add_pre_tax_deduction(title, amount);
-                else
-                    employees[i].get_withholding_object().add_post_tax_deduction(title, amount);
-            }
-            System.out.println("Operation performed successfully.");
-        }
+        System.out.println("Enter the number of the employee that you would like to delete a deduction for: ");
+        int response = get_valid_int_response(0, employees.length - 1);
+        String title;
+        double amount;
+        System.out.print("Enter the title of the deduction: ");
+        title = scanner.nextLine();
+        System.out.print("Enter the amount of the deduction: ");
+        amount = get_valid_double_response();
+        System.out.println("Enter \"P\" if this is a pre tax deduction, or \"T\" if this is a " +
+                "post tax deduction");
+        String letter = get_valid_letter_response("P", "T");
+        if (Objects.equals("P", letter))
+            employees[response].get_withholding_object().add_pre_tax_deduction(title, amount);
+        else
+            employees[response].get_withholding_object().add_post_tax_deduction(title, amount);
     }
     public void delete_deduction(){
-        int index = -1;
-        System.out.print("Enter \"O\" to delete a deduction for one employee, or \"A\" to delete" +
-                " a deduction for all employees: ");
-        String type = get_valid_letter_response("O", "A");
-        System.out.print("Enter \"A\" if this is a pretax deduction or \"B\" if this is a post tax deduction: ");
-        String selection = get_valid_letter_response("A", "B");
-        Scanner scanner = new Scanner(System.in);
-        boolean successful = false;
-        if (Objects.equals("O", type)){
-            System.out.print("Enter the name of the employee: ");
-            String name = scanner.nextLine();
-            name = name.toUpperCase();
-            for (int i = 0; i < get_user_count(); i++){
-                if (Objects.equals(name, employees[i].get_user())){
-                    index = i;
-                }
-            }
-            if (index >= 0){
-                System.out.println("Extra withholding for: " + employees[index].get_user());
-                employees[index].get_withholding_object().print_extra_deduction_information();
-                System.out.print("Enter the name of the deduction: ");
-                String title = scanner.nextLine();
-                System.out.print("Enter the amount of the deduction;");
-                double amount = get_valid_double_response();
-                if (Objects.equals(selection, "A"))
-                    successful = employees[index].get_withholding_object().delete_pre_tax_deduct(title, amount);
-                else
-                    successful = employees[index].get_withholding_object().delete_post_tax_deduct(title, amount);
-                if (successful)
-                    System.out.println("Operation performed successfully.");
-                else
-                    System.out.println("Operation could not be performed because the deduction could not be found. ");
-            }
-            else
-                System.out.println("User not found.");
+        ArrayList<Integer> valid_numbers = new ArrayList<Integer>();
+        for (int i = 0; i < employees.length; i++){
+            System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
         }
-        else{
-            System.out.print("Enter the name of the deduction: ");
-            String title = scanner.nextLine();
-            System.out.print("Enter the amount of the deduction;");
-            double amount = get_valid_double_response();
-            for (int i = 0; i < get_user_count(); i++){
-                if (Objects.equals(selection, "A")){
-                    employees[i].get_withholding_object().delete_pre_tax_deduct(title, amount);
-                }
-                else
-                    employees[i].get_withholding_object().delete_post_tax_deduct(title, amount);
-                System.out.println("If the deduction: " + title + ", with amount: " + amount +
-                        " existed, it has been deleted for all.");
-            }
-        }
+        System.out.println("Enter the number of the employee that you would like to delete a deduction for: ");
+        int response = get_valid_int_response(0, employees.length - 1);
+        valid_numbers = employees[response].get_withholding_object().print_extra_deduction_information();
+        int index = get_valid_number_in_array(valid_numbers);
+        employees[response].get_withholding_object().delete_deduction(index);
     }
-    public void add_gift(){
-        int index = -1;
-        System.out.print("Enter \"O\" to add a gift for one employee, or \"A\" to add" +
-                " a gift for all employees: ");
+    public int get_valid_number_in_array(ArrayList<Integer> valid_numbers){
+        Boolean valid_number_found = false;
+        int number = -1;
+        while (!valid_number_found){
+            System.out.println("Enter the number in parenthesis of the deduction you would like to delete: ");
+            number = get_valid_int_response(0, 50);
+            for (int i = 0; i < valid_numbers.size(); i++){
+                if (number == valid_numbers.get(i)){
+                    valid_number_found = true;
+                }
+            }
+            if (valid_number_found == false){
+                System.out.print("Invalid Entry! ");
+            }
+        }
+        return number;
+    }
+    public void add_gift() {
         Scanner scanner = new Scanner(System.in);
-        String response = get_valid_letter_response("O", "A");
-        System.out.print("Enter \"A\" if this is a pretax gift or \"B\" if this is a post tax gift: ");
-        String selection = get_valid_letter_response("A", "B");
-        System.out.print("Enter the name of the gift: ");
+        for (int i = 0; i < employees.length; i++){
+            System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
+        }
+        System.out.println("Enter the number of the employee that you would like to add a flat rate bonus for: ");
+        int response = get_valid_int_response(0, employees.length - 1);
+        System.out.println("Enter the title of the gift: ");
         String title = scanner.nextLine();
         System.out.print("Enter the amount of the gift: ");
-        double amount = get_valid_double_response();
-        if (Objects.equals("O", response)){
-            System.out.print("Enter the name of the employee: ");
-            String name = scanner.nextLine();
-            name = name.toUpperCase();
-            for (int i = 0; i < get_user_count(); i++){
-                if (Objects.equals(name, employees[i].get_user()))
-                    index = i;
-            }
-            if (index >= 0){
-                if (Objects.equals("A", selection))
-                    employees[index].get_withholding_object().add_pre_tax_gift(title, amount);
-                else
-                    employees[index].get_withholding_object().add_post_tax_gift(title, amount);
-                System.out.println("Operation performed successfully.");
-            }
-            else
-                System.out.println("User not found.");
+        double gift_amount = get_valid_double_response();
+        System.out.print("Enter \"P\" is this is a pretax gift or \"T\" if this is a post tax gift: ");
+        String letter = get_valid_letter_response("P", "T");
+        if (Objects.equals("P", letter)){
+            employees[response].get_withholding_object().add_pre_tax_gift(title, gift_amount);
         }
         else{
-            for (int i = 0; i < employees.length; i++){
-                if (Objects.equals(selection, "A"))
-                    employees[i].get_withholding_object().add_pre_tax_gift(title, amount);
-                else
-                    employees[i].get_withholding_object().add_post_tax_gift(title, amount);
-            }
-            System.out.println("Operation performed successfully.");
+            employees[response].get_withholding_object().add_post_tax_gift(title, gift_amount);
         }
+    }
+    public void delete_gift(){
+        ArrayList<Integer> valid_numbers = new ArrayList<Integer>();
+        for (int i = 0; i < employees.length; i++){
+            System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
+        }
+        System.out.println("Enter the number of the employee that you would like to delete a gift for: ");
+        int response = get_valid_int_response(0, employees.length - 1);
+        valid_numbers = employees[response].get_withholding_object().print_gift_information();
+        int index = get_valid_number_in_array(valid_numbers);
+        employees[response].get_withholding_object().delete_gift(index);
+
     }
     public float get_valid_float_response(int lower_bound, int higher_bound){
         Scanner scanner = new Scanner(System.in);

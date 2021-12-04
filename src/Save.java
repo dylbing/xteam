@@ -1,5 +1,6 @@
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
@@ -11,8 +12,8 @@ public class Save implements Serializable {
     //Organization
     int max_data = 50;
     static int max_static = 50;
-    private String[] files = new String[max_data];
-    private int file_count;
+    private static String[] files = new String[max_static];
+    private static int file_count;
     private ArrayList<Object> employee_data = new ArrayList<Object>();
     private ArrayList<Object> file_data = new ArrayList<Object>();
     //TODO look at the files array and figure out to to store and retrieve
@@ -35,6 +36,7 @@ public class Save implements Serializable {
     private static boolean[] high_level_manager = new boolean[max_static];
     private static Withholding[] pay = new Withholding[max_static];
     private static ArrayList<Object>  punch_logs = new ArrayList<Object>();
+    private static LocalDate[] current_days = new LocalDate[max_static];
     Save(Copy_of_Admin_Dashboard admin, Copy_of_Access_Control user) throws FileNotFoundException {
         this.admin = admin;
         this.user = user;
@@ -47,7 +49,7 @@ public class Save implements Serializable {
     Save() throws NoSuchAlgorithmException, InterruptedException {
         restore_information();
     }
-    Save(boolean file_management){
+    Save(boolean file_management) throws FileNotFoundException {
         File_Management();
     }
     public void print_file_array(){
@@ -55,7 +57,7 @@ public class Save implements Serializable {
             System.out.println("[" + i + "]" + files[i]);
         }
     }
-    public void File_Management(){
+    public void File_Management() throws FileNotFoundException {
         int selection = -1;
         int num_options = 2;
         Scanner scanner = new Scanner(System.in);
@@ -81,7 +83,7 @@ public class Save implements Serializable {
         else
             Delete_File();
     }
-    public void Delete_File(){
+    public void Delete_File() throws FileNotFoundException {
         int file_s = -1;
         Scanner scanner = new Scanner(System.in);
 
@@ -102,9 +104,14 @@ public class Save implements Serializable {
         for (int i = file_s; i < file_count; i++){
             files[i] = files[i + 1];
         }
-        file_count--;
-        System.out.println("File: " + filepath + " has been deleted successfully.");
+        if (file_count > 1){
+            file_count--;
+        }
 
+        file_data.add(files);
+        file_data.add(file_count);
+        write_file_names();
+        System.out.println("File: " + filepath + " has been deleted successfully.");
     }
     public String Create_New_File(){
         Scanner scanner = new Scanner(System.in);
@@ -130,7 +137,6 @@ public class Save implements Serializable {
     public void write_file_names(){
         try{
             FileOutputStream fileOut = new FileOutputStream("file_names.ser");
-            //FileOutputStream fileOut = new FileOutputStream("payroll_data.ser");
             ObjectOutputStream out = new ObjectOutputStream(fileOut);
             out.writeObject(file_data);
             out.close();
@@ -156,8 +162,16 @@ public class Save implements Serializable {
             return;
         }
         //separate all the objects in the one deserialized object
-        files = (String[])deserialized_3.get(0);
-        file_count = (int)deserialized_3.get(1);
+        try{
+            files = (String[])deserialized_3.get(0);
+            file_count = (int)deserialized_3.get(1);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+
+
+
     }
     public String File_Selection(){
         get_files();
@@ -210,7 +224,7 @@ public class Save implements Serializable {
                 employees[x] = new Employee();
                 employees[x].restore(access_type[x], name[x], password[x], id[x], tax_exemptions[x],
                              position[x], salary[x], sal_or_hourly[x], supreme_leader[x], high_level_manager[x], marital_status[x],
-                        (ArrayList<Object>) punch_logs.get(x));
+                        (ArrayList<Object>) punch_logs.get(x), current_days[x]);
                 employees[x].set_withholding_object();
             }
         }
@@ -232,6 +246,7 @@ public class Save implements Serializable {
             high_level_manager[i] = employees[i].get_high_level_status();
             marital_status[i] = employees[i].get_marital_status();
             punch_logs.add(employees[i].get_punch_log());
+            current_days[i] = employees[i].get_current_day();
         }
 
         //Admin_Dashboard Data
@@ -251,6 +266,7 @@ public class Save implements Serializable {
         employee_data.add(high_level_manager);
         employee_data.add(marital_status);
         employee_data.add(punch_logs);
+        employee_data.add(current_days);
         file_data.add(files);
         file_data.add(file_count);
 
@@ -329,6 +345,7 @@ public class Save implements Serializable {
         high_level_manager = (boolean[])deserialized.get(10);
         marital_status = (String[])deserialized.get(11);
         punch_logs = (ArrayList<Object>) deserialized.get(12);
+        current_days = (LocalDate[]) deserialized.get(13);
     }
 
 }

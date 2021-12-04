@@ -27,7 +27,7 @@ public class Employee extends Copy_of_Admin_Dashboard{
 
     public void restore(String access_type, String name, String password, int id, int tax_exemptions, String position,
                         double salary, boolean sal_or_hourly, boolean supreme_leader, boolean high_level_manager, String marital_status,
-                        ArrayList<Object> punch_log){
+                        ArrayList<Object> punch_log, LocalDate current_day){
         this.access_type = access_type;
         this.name = name;
         this.password = password;
@@ -41,6 +41,7 @@ public class Employee extends Copy_of_Admin_Dashboard{
         this.marital_status = marital_status;
         this.punch_log = punch_log;
         this.pay = pay;
+        this.current_day = current_day;
     }
     Employee() throws NoSuchAlgorithmException, InterruptedException {
     }
@@ -240,6 +241,8 @@ public class Employee extends Copy_of_Admin_Dashboard{
                         System.out.println("MEAL START: " + punch_log.get(i));
                         i++;
                     }
+                    if (punch_log.get(i).getClass() == LocalDate.class)
+                        i++;
                     if ("MEAL END".equals(punch_log.get(i))){
                         i++;
                         System.out.println("MEAL END: " + punch_log.get(i));
@@ -255,7 +258,6 @@ public class Employee extends Copy_of_Admin_Dashboard{
 
             }
         }
-
     }
     public void set_meal_end_time(LocalTime time){
         if (!LocalDate.now().equals(current_day))
@@ -325,6 +327,9 @@ public class Employee extends Copy_of_Admin_Dashboard{
             }
         }
         return time;
+    }
+    public LocalDate get_current_day(){
+        return current_day;
     }
     public Object get_clock_out_time(){
         LocalTime temp_time_store;
