@@ -34,7 +34,6 @@ public class Save implements Serializable {
     private static boolean[] sal_or_hourly = new boolean[max_static];
     private static boolean[] supreme_leader = new boolean[max_static];
     private static boolean[] high_level_manager = new boolean[max_static];
-    private static Withholding[] pay = new Withholding[max_static];
     private static ArrayList<Object>  punch_logs = new ArrayList<Object>();
     private static LocalDate[] current_days = new LocalDate[max_static];
     Save(Copy_of_Admin_Dashboard admin, Copy_of_Access_Control user) throws FileNotFoundException {

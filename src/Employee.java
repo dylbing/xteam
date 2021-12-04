@@ -6,6 +6,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Timer;
 
+import static java.lang.Math.abs;
+
 public class Employee extends Copy_of_Admin_Dashboard{
     final int milli_sec_day = 86400000;
     private String access_type;
@@ -27,7 +29,7 @@ public class Employee extends Copy_of_Admin_Dashboard{
 
     public void restore(String access_type, String name, String password, int id, int tax_exemptions, String position,
                         double salary, boolean sal_or_hourly, boolean supreme_leader, boolean high_level_manager, String marital_status,
-                        ArrayList<Object> punch_log, LocalDate current_day){
+                        ArrayList<Object> punch_log, LocalDate current_day) throws NoSuchAlgorithmException, InterruptedException {
         this.access_type = access_type;
         this.name = name;
         this.password = password;
@@ -42,6 +44,7 @@ public class Employee extends Copy_of_Admin_Dashboard{
         this.punch_log = punch_log;
         this.pay = pay;
         this.current_day = current_day;
+        set_withholding_object();
     }
     Employee() throws NoSuchAlgorithmException, InterruptedException {
     }
@@ -166,8 +169,8 @@ public class Employee extends Copy_of_Admin_Dashboard{
         punch_log.add(time);
     }
     public void set_meal_start_time(LocalTime time){
-        if (!LocalDate.now().equals(current_day))
-            punch_log.add(LocalDate.now());
+        //if (!LocalDate.now().equals(current_day))
+            //punch_log.add(LocalDate.now());
         punch_log.add("MEAL START");
         punch_log.add(time);
     }
@@ -181,22 +184,35 @@ public class Employee extends Copy_of_Admin_Dashboard{
         LocalTime meal_start = null;
         LocalTime meal_end = null;
         float total_time = 0;
+        float temp_time = 0;
         float hours_worked = 0;
         for (int i = 0; i < punch_log.size(); i++){
             if (punch_log.get(i).getClass() == LocalDate.class){
                 date = (LocalDate)punch_log.get(i);
                 i++;
             }
-            if (Objects.equals(date, start_date) && !Objects.equals(date, end_date)){
+            if (!Objects.equals(date, end_date)){
                 if ("CLOCK IN".equals(punch_log.get(i))){
                     i++;
                     clock_in = (LocalTime)punch_log.get(i);
                     while (!"CLOCK OUT".equals(punch_log.get(i)) && i < punch_log.size())
                         i++;
+                    if (punch_log.get(i - 1).getClass() == LocalDate.class)
+                        i--;
                     if ("CLOCK OUT".equals(punch_log.get(i))) {
                         i++;
                         clock_out = (LocalTime) punch_log.get(i);
-                        total_time += ChronoUnit.MINUTES.between(clock_in, clock_out);
+                        total_time += ChronoUnit.MINUTES.between(clock_out, clock_in);
+                    }
+                    else if (punch_log.get(i).getClass() == LocalDate.class){
+                        i++;
+                        if ("CLOCK OUT".equals(punch_log.get(i))){
+                            i++;
+                            clock_out = (LocalTime) punch_log.get(i);
+                            temp_time += ChronoUnit.MINUTES.between(clock_in, LocalTime.of(23, 59, 59));
+                            temp_time += ChronoUnit.MINUTES.between(LocalTime.of(0, 0, 0), clock_out);
+                            total_time += temp_time;
+                        }
                     }
                 }
 
@@ -231,7 +247,7 @@ public class Employee extends Copy_of_Admin_Dashboard{
                 date = (LocalDate)punch_log.get(i);
                 i++;
             }
-            if (Objects.equals(date, start_date) && !Objects.equals(date, end_date)){
+            if (!Objects.equals(date, end_date)){
                 if ("CLOCK IN".equals(punch_log.get(i))){
                     i++;
                     System.out.println("CLOCK IN: " + punch_log.get(i));
@@ -260,8 +276,8 @@ public class Employee extends Copy_of_Admin_Dashboard{
         }
     }
     public void set_meal_end_time(LocalTime time){
-        if (!LocalDate.now().equals(current_day))
-            punch_log.add(LocalDate.now());
+        //if (!LocalDate.now().equals(current_day))
+            //punch_log.add(LocalDate.now());
         punch_log.add("MEAL END");
         punch_log.add(time);
     }

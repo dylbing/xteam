@@ -6,7 +6,6 @@ import java.util.Scanner;
 
 public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     private String state;
-    private String frequency;
     protected static float suta_rate;
     protected static float futa_rate;
     protected static int suta_threshold = 14000;
@@ -15,7 +14,7 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     protected static float social_security_rate = .0602f;
     protected static float medicare_rate = .0145f;
     private static Withholding[] empl_pay_data;
-    private static Employee[] employees;
+    protected static String payroll_frequency;
     Payroll_Calculations() throws NoSuchAlgorithmException, InterruptedException {
         super();
     }
@@ -29,20 +28,28 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
 
     public void menu() throws IOException, InterruptedException, NoSuchAlgorithmException {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("What would you like to do?");
-        System.out.println("[1] Process Payroll Calculations for all Employees");
-        System.out.println("[2] Set SUTA rate");
-        System.out.println("[3] Set FUTA rate");
-        System.out.println("[4] Set Social Security Threshold");
-        System.out.println("[5] Set Medicare Rate");
-        System.out.println("[6] Set Social Security Rate");
-        System.out.println("[7] Add Deduction");
-        System.out.println("[8] Add Gift / Bonus");
-        System.out.println("[9] Delete Deduction");
-        System.out.println("[10] Delete Gift");
-        System.out.println("[11] Return to Menu");
-        System.out.print("Enter a number corresponding to the operation you would like to perform: ");
-        int selection = get_valid_int_response(1, 11);
+        int selection;
+        if (payroll_frequency == null){
+            selection = 11;
+        }
+        else{
+            System.out.println("What would you like to do?");
+            System.out.println("[1] Process Payroll Calculations for all Employees");
+            System.out.println("[2] Set SUTA rate");
+            System.out.println("[3] Set FUTA rate");
+            System.out.println("[4] Set Social Security Threshold");
+            System.out.println("[5] Set Medicare Rate");
+            System.out.println("[6] Set Social Security Rate");
+            System.out.println("[7] Add Deduction");
+            System.out.println("[8] Add Gift / Bonus");
+            System.out.println("[9] Delete Deduction");
+            System.out.println("[10] Delete Gift");
+            System.out.println("[11] Change Payroll Frequency");
+            System.out.println("[12] Return to Menu");
+            System.out.print("Enter a number corresponding to the operation you would like to perform: ");
+            selection = get_valid_int_response(1, 12);
+        }
+
         switch(selection){
             case 1:
                 process_all_payroll();
@@ -72,18 +79,53 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
                 delete_deduction();
                 menu();
             case 10:
-                //delete_gift();
+                delete_gift();
             case 11:
-                this.Menu();
+                set_payroll_frequency();
+                menu();
+            case 12:
+                super.Menu();
                 break;
         }
     }
-    public void process_all_payroll() throws IOException {
-        System.out.print("Enter the pay_period you would like to process payroll for: ");
-        for (int i = 0; i < employees.length; i++){
-            employees[i].get_withholding_object().calculate_withholding();
-            employees[i].get_withholding_object().get_excel_data("State", employees[i].get_marital_status(), frequency);
-            employees[i].get_withholding_object().get_excel_data("Federal", employees[i].get_marital_status(), frequency);
+    private void set_payroll_frequency(){
+        if (payroll_frequency != null){
+            System.out.println("The current payroll frequency is: " + payroll_frequency);
+        }
+        System.out.println("What would you like to change the payroll frequency to?");
+        System.out.println("[1] Daily");
+        System.out.println("[2] Weekly");
+        System.out.println("[3] Bi-weekly");
+        System.out.println("[4] Semi-monthly");
+        System.out.println("[5] Monthly");
+        System.out.print("Enter the number corresponding to the frequency you would like to set: ");
+        int selection = get_valid_int_response(1, 5);
+        switch (selection){
+            case 1:
+                payroll_frequency = "Daily";
+                break;
+            case 2:
+                payroll_frequency = "Weekly";
+                break;
+            case 3:
+                payroll_frequency = "Biweekly";
+                break;
+            case 4:
+                payroll_frequency = "Semimonthly";
+                break;
+            case 5:
+                payroll_frequency = "Monthly";
+                break;
+        }
+        System.out.println("Payroll frequency has been changed to: " + payroll_frequency + ".");
+    }
+
+    public void process_all_payroll() throws IOException, NoSuchAlgorithmException, InterruptedException {
+        System.out.print("Enter the pay period you would like to process payroll for: ");
+        for (int i = 0; i < get_user_count(); i++){
+            employees[i].get_withholding_object().set_employee_object(employees[i]);
+            employees[i].get_withholding_object().get_excel_data("State", employees[i].get_marital_status(), payroll_frequency);
+            employees[i].get_withholding_object().get_excel_data("Federal", employees[i].get_marital_status(), payroll_frequency);
         }
         System.out.println("Payroll has been processed.");
     }

@@ -30,6 +30,7 @@ public class Employee_Dashboard extends Copy_of_Admin_Dashboard{
         selection = get_valid_int_response(lower_bound, higher_bound);
         switch (selection){
             case 1:
+                employees[user_index].get_withholding_object().print_paystub();
                 //employees[user_index].get_withholding_object(). TODO finish so that can access pay history
                 break;
             case 2:

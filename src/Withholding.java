@@ -12,6 +12,7 @@ public class Withholding extends Payroll_Calculations{
     private static final int max_data = 50;
     private static double withholding_amount;
     private static double gross_pay;
+    private static double original_gross_pay;
     private static int col_depth;
     private static double[][] array;
     private static double state_withholding;
@@ -22,13 +23,8 @@ public class Withholding extends Payroll_Calculations{
     private static double earned_post_tax_ytd = 0;
     //private static double[] unpayable_deductions = new double[10];
     private static ArrayList<Object> pay_summary = new ArrayList<Object>();
-    private static int add_pre_tax_count = 0;
-    private static int add_post_tax_count = 0;
     private static double net_pay = 0;
-    private static int spaces_past_normal = 0;
     private static List<Object> history = new ArrayList<Object>();
-    private static int payroll_history_count = 0;
-    private Object[] temp_storage = new Object[15];
     private static Employee object;
     private float overtime_multiplier = 1.5f;
     private int salary_work_week = 40;
@@ -37,25 +33,91 @@ public class Withholding extends Payroll_Calculations{
         super();
         this.object = object;
     }
+    public void set_employee_object(Employee object){
+        this.object = object;
+    }
     public void print_paystub(){
         System.out.println("Pay Period ended: "); // TODO add date in here when figured out
 
         for (int i = 0; i < pay_summary.size(); i++){
-
+            if (pay_summary.get(i) == "GROSS PAY"){
+                System.out.println("GROSS PAY: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "REGULAR HOURS"){
+                System.out.println("REGULAR HOURS: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "OVERTIME HOURS"){
+                System.out.println("OVERTIME HOURS: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "SOCIAL SECURITY"){
+                System.out.println("SOCIAL SECURITY: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "MEDICARE"){
+                System.out.println("MEDICARE: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "STATE"){
+                System.out.println("STATE: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "FEDERAL"){
+                System.out.println("FEDERAL: " + pay_summary.get(i + 1));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "NET PAY"){
+                System.out.println("NET PAY: " + net_pay);
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "PRE TAX EARNED YTD"){
+                System.out.println("PRE TAX EARNED YTD: " + pay_summary.get(i));
+                i += 2;
+            }
+            else if (pay_summary.get(i) == "POST TAX EARNED YTD"){
+                System.out.println("POST TAX EARNED YTD: " + pay_summary.get(i));
+                i += 2;
+            }
         }
     }
     public void calculate_withholding(){
         adjust_gross();
         if ((earned_post_tax_ytd) > social_security_threshold){
-            social_security_withholding = gross_pay * social_security_rate;
+            social_security_withholding = net_pay * social_security_rate;
         }
         else if ((earned_post_tax_ytd + gross_pay) > social_security_withholding){
             social_security_withholding = social_security_rate * (social_security_threshold - earned_pre_tax_ytd);
         }
         else
             social_security_withholding = social_security_rate * gross_pay;
-        medicare_withholding = gross_pay * medicare_rate;
-        net_pay = gross_pay - social_security_withholding - medicare_withholding - federal_withholding - state_withholding;
+        medicare_withholding = net_pay * medicare_rate;
+        net_pay = net_pay - social_security_withholding - medicare_withholding - federal_withholding - state_withholding;
+    }
+    private void add_to_list(){
+        pay_summary.add("GROSS PAY");
+        pay_summary.add(gross_pay);
+        pay_summary.add("REGULAR HOURS");
+        float hours = object.calculate_hours_worked(null, null);
+        float overtime = hours - 40;
+        pay_summary.add(hours - (overtime));
+        pay_summary.add("OVERTIME HOURS");
+        pay_summary.add(overtime);
+        pay_summary.add("SOCIAL SECURITY");
+        pay_summary.add(social_security_withholding);
+        pay_summary.add("MEDICARE");
+        pay_summary.add(medicare_withholding);
+        pay_summary.add("STATE");
+        pay_summary.add(state_withholding);
+        pay_summary.add("FEDERAL");
+        pay_summary.add(federal_withholding);
+        pay_summary.add("NET PAY");
+        pay_summary.add(net_pay);
+        pay_summary.add("PRE TAX EARNED YTD");
+        pay_summary.add(earned_pre_tax_ytd);
+        pay_summary.add("POST TAX EARNED YTD");
+        pay_summary.add(earned_post_tax_ytd);
     }
     public void adjust_gross(){
         float overtime_hours = 0;
@@ -65,13 +127,30 @@ public class Withholding extends Payroll_Calculations{
             gross_pay = object.calculate_hours_worked(null, null);
             if (gross_pay > 40){
                 overtime_hours = (float)(gross_pay - 40);
-                gross_pay = gross_pay - overtime_hours;
+                net_pay = gross_pay - overtime_hours;
             }
-            gross_pay = (gross_pay * object.get_salary()) + (overtime_hours * object.get_salary()
-                    * overtime_multiplier); //TODO make the
+            net_pay = (gross_pay * object.get_salary()) + (overtime_hours * object.get_salary()
+                    * overtime_multiplier);
         }
         else{
-            gross_pay = salary_work_week * object.get_salary();
+            int tax_divisor = 0;
+            switch (payroll_frequency){
+                case "Daily":
+                    tax_divisor = 365;
+                    break;
+                case "Weekly":
+                    tax_divisor = 52;
+                    break;
+                case "Biweekly":
+                    tax_divisor = 26;
+                    break;
+                case "Semimonthly":
+                    tax_divisor = 24;
+                    break;
+                case "Monthly":
+                    tax_divisor = 12;
+            }
+            gross_pay = (salary_work_week * object.get_salary())/tax_divisor;
         }
         for (int i = 0; i < pay_summary.size(); i++){
             if (pay_summary.get(i) == "PRE TAX GIFT")
@@ -79,8 +158,8 @@ public class Withholding extends Payroll_Calculations{
             else if (pay_summary.get(i) == "PRE TAX DEDUCTION")
                 pre_tax_deductions = (float) (gross_pay - (gross_pay * ((float)pay_summary.get(i + 2))));
         }
-        gross_pay += pre_tax_gifts;
-        gross_pay -= pre_tax_deductions;
+        net_pay += pre_tax_gifts;
+        net_pay -= pre_tax_deductions;
     }
     public void add_pre_tax_deduction(String title, double amount){
         amount = amount / 100;
@@ -196,7 +275,7 @@ public class Withholding extends Payroll_Calculations{
                         System.out.print("File not found with entered combination");
                 }
                 break;
-            case "FEDERAL":
+            case "Federal":
                 switch (frequency){
                     case "Daily":
                         excelFilePath = ".\\datafile\\Wage Bracket Daily.xlsx";
@@ -227,7 +306,6 @@ public class Withholding extends Payroll_Calculations{
                 XSSFCell cell = row.getCell(c);
                 switch (cell.getCellType()){
                     case NUMERIC:
-                        System.out.println(cell.getNumericCellValue());
                         witholding[r][c] = cell.getNumericCellValue();
                         break;
                     default:
@@ -242,7 +320,7 @@ public class Withholding extends Payroll_Calculations{
     }
     public static void get_withholding_amount(String withholding_type) throws IOException {
         for (int i = 0; i < col_depth; i++){
-            if (gross_pay >= array[i][1] && gross_pay < array[i][2]){
+            if (gross_pay >= array[i][0] && gross_pay < array[i][1]){
                 if (Objects.equals(withholding_type, "State")){
                     state_withholding = array[i][object.get_tax_exemptions() + 2];
                 }
