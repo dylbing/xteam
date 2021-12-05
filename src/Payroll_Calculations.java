@@ -13,7 +13,7 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     protected static int social_security_threshold = 142800;
     protected static float social_security_rate = .0602f;
     protected static float medicare_rate = .0145f;
-    private static Withholding[] empl_pay_data;
+    //private static Withholding[] empl_pay_data;
     protected static String payroll_frequency;
     Payroll_Calculations() throws NoSuchAlgorithmException, InterruptedException {
         super();
@@ -22,9 +22,9 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
         super();
         this.employees = employees;
     }
-    public void update_employee_list(Employee[] employees){
-        this.employees = employees;
-    }
+    //public void update_employee_list(Employee[] employees){
+        //this.employees = employees;
+    //}
 
     public void menu() throws IOException, InterruptedException, NoSuchAlgorithmException {
         Scanner scanner = new Scanner(System.in);
@@ -307,4 +307,56 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
         }
         return response;
     }
+    public float get_suta(){
+        return suta_rate;
+    }
+    public float get_futa(){
+        return futa_rate;
+    }
+    public int get_suta_threshold(){
+        return suta_threshold;
+    }
+    public int get_futa_threshold(){
+        return futa_threshold;
+    }
+    public int get_social_security_threshold(){
+        return social_security_threshold;
+    }
+    public float get_social_security_rate(){
+        return social_security_rate;
+    }
+    public float get_medicare_rate(){
+        return medicare_rate;
+    }
+    public String get_payroll_frequency(){
+        return payroll_frequency;
+    }
+    public void set_suta(float suta){
+        this.suta_rate = suta_rate;
+    }
+    public void set_futa(float futa){
+        futa_rate = futa;
+    }
+    public void set_futa_threshold(int futa_threshold){
+        this.futa_threshold = futa_threshold;
+    }
+    public void set_suta_threshold(int suta_threshold){
+        this.suta_threshold = suta_threshold;
+    }
+    public void set_social_security_threshold(int social_security_threshold){
+        this.social_security_threshold = social_security_threshold;
+    }
+    public void set_medicare_rate(float medicare_rate){
+        this.medicare_rate = medicare_rate;
+    }
+    public void set_payroll_frequency(String payroll_frequency){
+        this.payroll_frequency = payroll_frequency;
+    }
+    public void set_social_security_rate(float social_security_rate){
+        this.social_security_rate = social_security_rate;
+    }
+
+
+
+
 }

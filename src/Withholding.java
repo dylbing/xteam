@@ -5,15 +5,12 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.NoSuchAlgorithmException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.Calendar;
 
 public class Withholding extends Payroll_Calculations{
     private static final int max_data = 50;
-    private static double withholding_amount;
+    //private static double withholding_amount;
     private static double gross_pay;
     private static double original_gross_pay;
     private static int col_depth;
@@ -27,7 +24,7 @@ public class Withholding extends Payroll_Calculations{
     //private static double[] unpayable_deductions = new double[10];
     private static ArrayList<Object> pay_summary = new ArrayList<Object>();
     private static double net_pay = 0;
-    private static List<Object> history = new ArrayList<Object>();
+    //private static List<Object> history = new ArrayList<Object>();
     private static Employee object;
     private float overtime_multiplier = 1.5f;
     private int salary_work_week = 40;
@@ -36,8 +33,18 @@ public class Withholding extends Payroll_Calculations{
         super();
         this.object = object;
     }
+    public ArrayList<Object> get_pay_summary(){
+        return pay_summary;
+    }
+    public void set_pay_summary(ArrayList<Object> pay_summary){
+        this.pay_summary = pay_summary;
+    }
+
     public void set_employee_object(Employee object){
         this.object = object;
+    }
+    public void set_employee_object(int x){
+        object = employees[x];
     }
     public void print_paystub(){
         System.out.println("Pay Period ended: "); // TODO add date in here when figured out

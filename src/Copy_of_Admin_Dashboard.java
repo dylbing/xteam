@@ -54,7 +54,6 @@ public class Copy_of_Admin_Dashboard extends Copy_of_Access_Control{
                     payroll.menu();
                 }
                 else{
-                    payroll.update_employee_list(employees);
                     payroll.menu();
                 }
 
@@ -645,5 +644,11 @@ public class Copy_of_Admin_Dashboard extends Copy_of_Access_Control{
     }
     public void set_employee_list(Employee[] employees){
         this.employees = employees;
+    }
+    public Payroll_Calculations get_payroll_object(){
+        return payroll;
+    }
+    public void set_payroll_object() throws NoSuchAlgorithmException, InterruptedException {
+        payroll = new Payroll_Calculations();
     }
 }

@@ -36,6 +36,20 @@ public class Save implements Serializable {
     private static boolean[] high_level_manager = new boolean[max_static];
     private static ArrayList<Object>  punch_logs = new ArrayList<Object>();
     private static LocalDate[] current_days = new LocalDate[max_static];
+    private static boolean[] w4_checkbox = new boolean[max_static];
+    private static boolean[] head_of_household = new boolean[max_static];
+
+    private static float suta_rate;
+    private static float futa_rate;
+    private static int suta_threshold;
+    private static int futa_threshold;
+    private static int social_security_threshold;
+    private static float social_security_rate;
+    private static float medicare_rate;
+    private static String payroll_frequency;
+
+    private static ArrayList<Object> pay_summary = new ArrayList<Object>();
+
     Save(Copy_of_Admin_Dashboard admin, Copy_of_Access_Control user) throws FileNotFoundException {
         this.admin = admin;
         this.user = user;
@@ -218,6 +232,15 @@ public class Save implements Serializable {
             user = new Copy_of_Access_Control();
             user.set_object(admin);
             user.set_stored_count(stored_count);
+            admin.set_payroll_object();
+            admin.get_payroll_object().set_futa(futa_rate);
+            admin.get_payroll_object().set_suta(suta_rate);
+            admin.get_payroll_object().set_social_security_threshold(social_security_threshold);
+            admin.get_payroll_object().set_social_security_rate(social_security_rate);
+            admin.get_payroll_object().set_futa_threshold(futa_threshold);
+            admin.get_payroll_object().set_suta_threshold(suta_threshold);
+            admin.get_payroll_object().set_medicare_rate(medicare_rate);
+            admin.get_payroll_object().set_payroll_frequency(payroll_frequency);
             //TODO add the employee list to admin
             for (int x = 0; x < stored_count; x++){
                 employees[x] = new Employee();
@@ -225,6 +248,10 @@ public class Save implements Serializable {
                              position[x], salary[x], sal_or_hourly[x], supreme_leader[x], high_level_manager[x], marital_status[x],
                         (ArrayList<Object>) punch_logs.get(x), current_days[x]);
                 employees[x].set_withholding_object();
+                employees[x].set_head_of_household(head_of_household[x]);
+                employees[x].set_w4_box(w4_checkbox[x]);
+                employees[x].get_withholding_object().set_pay_summary((ArrayList<Object>) pay_summary.get(x));
+                employees[x].get_withholding_object().set_employee_object(x);
             }
         }
     }
@@ -246,6 +273,29 @@ public class Save implements Serializable {
             marital_status[i] = employees[i].get_marital_status();
             punch_logs.add(employees[i].get_punch_log());
             current_days[i] = employees[i].get_current_day();
+            w4_checkbox[i] = employees[i].get_w4check_box();
+            head_of_household[i] = employees[i].get_head_of_household();
+
+            suta_rate = admin.get_payroll_object().get_suta();
+            futa_rate = admin.get_payroll_object().get_futa();
+            suta_threshold = admin.get_payroll_object().get_suta_threshold();
+            futa_threshold = admin.get_payroll_object().get_futa_threshold();
+            social_security_threshold = admin.get_payroll_object().get_social_security_threshold();
+            social_security_rate = admin.get_payroll_object().get_social_security_rate();
+            medicare_rate = admin.get_payroll_object().get_medicare_rate();
+            payroll_frequency = admin.get_payroll_object().get_payroll_frequency();
+            pay_summary.add(employees[i].get_withholding_object().get_pay_summary());
+
+            /*
+            suta_threshold;
+    private static int futa_threshold;
+    private static int social_security_threshold;
+    private static float social_security_rate;
+    private static float medicare_rate;
+    private static String payroll_frequency;
+
+    private static ArrayList<Object> pay_summary = new ArrayList<Object>();
+             */
         }
 
         //Admin_Dashboard Data
@@ -266,6 +316,18 @@ public class Save implements Serializable {
         employee_data.add(marital_status);
         employee_data.add(punch_logs);
         employee_data.add(current_days);
+
+        employee_data.add(w4_checkbox);
+        employee_data.add(head_of_household);
+        employee_data.add(suta_rate);
+        employee_data.add(futa_rate);
+        employee_data.add(suta_threshold);
+        employee_data.add(futa_threshold);
+        employee_data.add(social_security_threshold);
+        employee_data.add(social_security_rate);
+        employee_data.add(medicare_rate);
+        employee_data.add(payroll_frequency);
+        employee_data.add(pay_summary);
         file_data.add(files);
         file_data.add(file_count);
 
@@ -345,6 +407,18 @@ public class Save implements Serializable {
         marital_status = (String[])deserialized.get(11);
         punch_logs = (ArrayList<Object>) deserialized.get(12);
         current_days = (LocalDate[]) deserialized.get(13);
+
+        w4_checkbox = (boolean[]) deserialized.get(14);
+        head_of_household = (boolean[]) deserialized.get(15);
+        suta_rate = (float) deserialized.get(16);
+        futa_rate = (float)deserialized.get(17);
+        suta_threshold = (int)deserialized.get(18);
+        futa_threshold = (int)deserialized.get(19);
+        social_security_threshold = (int)deserialized.get(20);
+        social_security_rate = (float)deserialized.get(21);
+        medicare_rate = (float)deserialized.get(22);
+        payroll_frequency = (String) deserialized.get(23);
+        pay_summary = (ArrayList<Object>) deserialized.get(24);
     }
 
 }
