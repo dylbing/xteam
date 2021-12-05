@@ -80,6 +80,7 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
                 menu();
             case 10:
                 delete_gift();
+                menu();
             case 11:
                 set_payroll_frequency();
                 menu();
@@ -121,11 +122,14 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     }
 
     public void process_all_payroll() throws IOException, NoSuchAlgorithmException, InterruptedException {
-        System.out.print("Enter the pay period you would like to process payroll for: ");
+        //System.out.print("Enter the pay period you would like to process payroll for: ");
         for (int i = 0; i < get_user_count(); i++){
             employees[i].get_withholding_object().set_employee_object(employees[i]);
+            employees[i].get_withholding_object().adjust_gross();
             employees[i].get_withholding_object().get_excel_data("State", employees[i].get_marital_status(), payroll_frequency);
             employees[i].get_withholding_object().get_excel_data("Federal", employees[i].get_marital_status(), payroll_frequency);
+            employees[i].get_withholding_object().calculate_withholding();
+            employees[i].get_withholding_object().add_to_list();
         }
         System.out.println("Payroll has been processed.");
     }
@@ -185,11 +189,11 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     }
     public void add_deduction() throws InterruptedException {
         Scanner scanner = new Scanner(System.in);
-        for (int i = 0; i < employees.length; i++){
+        for (int i = 0; i < get_user_count(); i++){
             System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
         }
         System.out.println("Enter the number of the employee that you would like to delete a deduction for: ");
-        int response = get_valid_int_response(0, employees.length - 1);
+        int response = get_valid_int_response(0, get_user_count() - 1);
         String title;
         double amount;
         System.out.print("Enter the title of the deduction: ");
@@ -206,14 +210,19 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     }
     public void delete_deduction(){
         ArrayList<Integer> valid_numbers = new ArrayList<Integer>();
-        for (int i = 0; i < employees.length; i++){
+        for (int i = 0; i < get_user_count(); i++){
             System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
         }
         System.out.println("Enter the number of the employee that you would like to delete a deduction for: ");
-        int response = get_valid_int_response(0, employees.length - 1);
+        int response = get_valid_int_response(0, get_user_count() - 1);
         valid_numbers = employees[response].get_withholding_object().print_extra_deduction_information();
-        int index = get_valid_number_in_array(valid_numbers);
-        employees[response].get_withholding_object().delete_deduction(index);
+        if (valid_numbers != null) {
+            int index = get_valid_number_in_array(valid_numbers);
+            employees[response].get_withholding_object().delete_deduction(index);
+        }
+        else{
+            System.out.println("This employee has no deductions.");
+        }
     }
     public int get_valid_number_in_array(ArrayList<Integer> valid_numbers){
         Boolean valid_number_found = false;
@@ -234,11 +243,11 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     }
     public void add_gift() {
         Scanner scanner = new Scanner(System.in);
-        for (int i = 0; i < employees.length; i++){
+        for (int i = 0; i < get_user_count(); i++){
             System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
         }
         System.out.println("Enter the number of the employee that you would like to add a flat rate bonus for: ");
-        int response = get_valid_int_response(0, employees.length - 1);
+        int response = get_valid_int_response(0, get_user_count() - 1);
         System.out.println("Enter the title of the gift: ");
         String title = scanner.nextLine();
         System.out.print("Enter the amount of the gift: ");
@@ -254,14 +263,19 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
     }
     public void delete_gift(){
         ArrayList<Integer> valid_numbers = new ArrayList<Integer>();
-        for (int i = 0; i < employees.length; i++){
+        for (int i = 0; i < get_user_count(); i++){
             System.out.println("[" + i + "] " +employees[get_user_index()].get_user());
         }
         System.out.println("Enter the number of the employee that you would like to delete a gift for: ");
-        int response = get_valid_int_response(0, employees.length - 1);
+        int response = get_valid_int_response(0, get_user_count() - 1);
         valid_numbers = employees[response].get_withholding_object().print_gift_information();
-        int index = get_valid_number_in_array(valid_numbers);
-        employees[response].get_withholding_object().delete_gift(index);
+        if (valid_numbers != null){
+            int index = get_valid_number_in_array(valid_numbers);
+            employees[response].get_withholding_object().delete_gift(index);
+        }
+        else{
+            System.out.println("There are no gifts or bonuses for this employee");
+        }
 
     }
     public float get_valid_float_response(int lower_bound, int higher_bound){

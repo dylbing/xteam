@@ -234,7 +234,7 @@ public class Employee extends Copy_of_Admin_Dashboard{
             }
         }
         total_time = total_time / 60;
-        return total_time;
+        return abs(total_time);
     }
     public void print_punches(LocalDate start_date, LocalDate end_date){
         LocalDate date = null;
