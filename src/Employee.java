@@ -26,6 +26,21 @@ public class Employee extends Copy_of_Admin_Dashboard{
     private static LocalDate current_day;
     private static ArrayList<Object> punch_log = new ArrayList<Object>();
 
+    private static boolean w4_checkbox = false;
+    private static boolean head_of_household = false;
+
+    public boolean get_w4check_box(){
+        return w4_checkbox;
+    }
+    public boolean get_head_of_household(){
+        return head_of_household;
+    }
+    public void set_w4_box(boolean response){
+        w4_checkbox = response;
+    }
+    public void set_head_of_household(boolean response){
+        head_of_household = response;
+    }
 
     public void restore(String access_type, String name, String password, int id, int tax_exemptions, String position,
                         double salary, boolean sal_or_hourly, boolean supreme_leader, boolean high_level_manager, String marital_status,

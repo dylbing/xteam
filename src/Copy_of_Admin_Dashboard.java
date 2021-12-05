@@ -541,6 +541,18 @@ public class Copy_of_Admin_Dashboard extends Copy_of_Access_Control{
 
         System.out.print("Enter a tax exemption allowance number: ");
         int tax_exemptions = get_valid_int_response(0, 10);
+        System.out.print("Did the employee check the checkbox in step two of the W-4? (\"Y\" or \"N\"): ");
+        String response = get_valid_letter_response("Y", "N");
+        if (Objects.equals(response, "Y"))
+            employees[get_user_count()].set_w4_box(true);
+        else
+            employees[get_user_count()].set_w4_box(false);
+        System.out.println("Is the employee the head of their household? \"Y\" or \"N\"): ");
+        response = get_valid_letter_response("Y", "N");
+        if (Objects.equals(response, "Y"))
+            employees[get_user_count()].set_head_of_household(true);
+        else
+            employees[get_user_count()].set_head_of_household(false);
         employees[get_user_count()].set_withholding_object();
         String new_pass = create_new_user_password(user, acc_type);
         Clear.cls();

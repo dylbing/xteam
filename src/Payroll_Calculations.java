@@ -85,7 +85,7 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
                 set_payroll_frequency();
                 menu();
             case 12:
-                super.Menu();
+                Menu();
                 break;
         }
     }

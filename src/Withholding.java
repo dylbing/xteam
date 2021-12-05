@@ -47,11 +47,11 @@ public class Withholding extends Payroll_Calculations{
                 System.out.println("GROSS PAY: " +  pay_summary.get(i + 1));
                 i++;
             }
-            else if (pay_summary.get(i) == "REGULAR HOURS"){
+            else if (pay_summary.get(i) == "REGULAR HOURS" && !object.get_salary_or_hourly()){
                 System.out.println("REGULAR HOURS: " + pay_summary.get(i + 1));
                 i++;
             }
-            else if (pay_summary.get(i) == "OVERTIME HOURS"){
+            else if (pay_summary.get(i) == "OVERTIME HOURS" && !object.get_salary_or_hourly()){
                 System.out.println("OVERTIME HOURS: " + pay_summary.get(i + 1));
                 i++;
             }
@@ -100,7 +100,9 @@ public class Withholding extends Payroll_Calculations{
         System.out.println();
         System.out.print("Enter \"Y\" when you would like to exit");
         String response = get_valid_letter_response("Y", "Y");
-        if (Objects.equals(response, "Y")){}
+        if (Objects.equals(response, "Y")){
+            System.out.println();
+        }
     }
     public void calculate_withholding(){
         if ((earned_post_tax_ytd) > social_security_threshold){
@@ -175,7 +177,7 @@ public class Withholding extends Payroll_Calculations{
         else{
             switch (payroll_frequency){
                 case "Daily":
-                    tax_divisor = 365;
+                    tax_divisor = 260;
                     break;
                 case "Weekly":
                     tax_divisor = 52;
@@ -364,13 +366,27 @@ public class Withholding extends Payroll_Calculations{
     }
     public static void get_withholding_amount(String withholding_type) throws IOException {
         for (int i = 0; i < col_depth; i++){
-            if ((gross_pay >= array[i][0] && gross_pay < array[i][1]) || gross_pay >= array[i][0] &&
-                array[i][1] == 0){
+            if ((gross_pay >= array[i][0] && gross_pay < array[i][1]) || (gross_pay >= array[i][0] &&
+                array[i][1] == 0 && array[i][0] != 0)){
                 if (Objects.equals(withholding_type, "State")){
                     state_withholding = array[i][object.get_tax_exemptions() + 2];
                 }
                 else{
-                    federal_withholding = array[i][object.get_tax_exemptions() + 2];
+                    int index = 0;
+                    if (object.get_w4check_box() && object.get_head_of_household())
+                        index = 5;
+                    else if (object.get_head_of_household() && !object.get_w4check_box())
+                        index = 4;
+                    else if (Objects.equals(object.get_marital_status(), "M") && object.get_w4check_box())
+                        index = 3;
+                    else if (object.equals(object.get_marital_status()) && !object.get_w4check_box())
+                        index = 2;
+                    else if (object.equals(object.get_marital_status() == "S" && !object.get_w4check_box()))
+                        index = 6;
+                    else
+                        index = 7;
+                    federal_withholding = array[i][index];
+                    System.out.println(federal_withholding);
                 }
             }
         }
