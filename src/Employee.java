@@ -22,9 +22,9 @@ public class Employee extends Copy_of_Admin_Dashboard{
     private boolean sal_or_hourly;
     private boolean supreme_leader;
     private boolean high_level_manager;
-    private static Withholding pay;
+    private Withholding pay;
     private static LocalDate current_day;
-    private static ArrayList<Object> punch_log = new ArrayList<Object>();
+    private ArrayList<Object> punch_log = new ArrayList<Object>(); // trying non static vs static
 
     private static boolean w4_checkbox = false;
     private static boolean head_of_household = false;

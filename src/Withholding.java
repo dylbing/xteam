@@ -19,10 +19,10 @@ public class Withholding extends Payroll_Calculations{
     private static double federal_withholding;
     private static double social_security_withholding;
     private static double medicare_withholding;
-    private static double earned_pre_tax_ytd = 0;
-    private static double earned_post_tax_ytd = 0;
+    private double earned_pre_tax_ytd = 0;
+    private double earned_post_tax_ytd = 0;
     //private static double[] unpayable_deductions = new double[10];
-    private static ArrayList<Object> pay_summary = new ArrayList<Object>();
+    private ArrayList<Object> pay_summary = new ArrayList<Object>();
     private static double net_pay = 0;
     //private static List<Object> history = new ArrayList<Object>();
     private static Employee object;
@@ -39,11 +39,11 @@ public class Withholding extends Payroll_Calculations{
     public void set_pay_summary(ArrayList<Object> pay_summary){
         this.pay_summary = pay_summary;
     }
-
     public void set_employee_object(Employee object){
         this.object = object;
     }
     public void set_employee_object(int x){
+        pay_summary = new ArrayList<Object>();
         object = employees[x];
     }
     public void print_paystub(){
@@ -105,7 +105,7 @@ public class Withholding extends Payroll_Calculations{
         }
         System.out.println();
         System.out.println();
-        System.out.print("Enter \"Y\" when you would like to exit");
+        System.out.print("Enter \"Y\" when you would like to exit: ");
         String response = get_valid_letter_response("Y", "Y");
         if (Objects.equals(response, "Y")){
             System.out.println();
@@ -202,14 +202,20 @@ public class Withholding extends Payroll_Calculations{
             net_pay = gross_pay;
         }
         for (int i = 0; i < pay_summary.size(); i++){
-            if (pay_summary.get(i) == "PRE TAX GIFT")
-                pre_tax_gifts = (double)(pay_summary.get(i + 2));
-            else if (pay_summary.get(i) == "PRE TAX DEDUCTION")
-                pre_tax_deductions = (double) (gross_pay - (gross_pay * ((float)pay_summary.get(i + 2))));
+            if (pay_summary.get(i) == "PRE TAX GIFT"){
+                pre_tax_gifts = gross_pay * (double)(pay_summary.get(i + 2));
+                pay_summary.remove(i + 2);
+                pay_summary.add(i+2,pre_tax_deductions);
+            }
+            else if (pay_summary.get(i) == "PRE TAX DEDUCTION"){
+                pre_tax_deductions = (gross_pay * (double)pay_summary.get(i + 2));
+                pay_summary.remove(i + 2);
+                pay_summary.add(pre_tax_gifts);
+            }
         }
-        gross_pay = (float)Math.round(gross_pay * 100) /100;
-        pre_tax_gifts = (float)Math.round(pre_tax_gifts * 100) / 100;
-        pre_tax_deductions = (float)Math.round(pre_tax_deductions * 100) / 100;
+        gross_pay = (double)Math.round(gross_pay * 100) /100;
+        pre_tax_gifts = (double)Math.round(pre_tax_gifts * 100) / 100;
+        pre_tax_deductions = (double)Math.round(pre_tax_deductions * 100) / 100;
         gross_pay += pre_tax_gifts;
         net_pay += pre_tax_gifts;
         net_pay -= pre_tax_deductions;

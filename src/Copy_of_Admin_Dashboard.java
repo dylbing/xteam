@@ -59,8 +59,10 @@ public class Copy_of_Admin_Dashboard extends Copy_of_Access_Control{
 
                 Menu();
             case 3:
+                if (payroll == null)
+                    payroll = new Payroll_Calculations(employees);
                 Save save = new Save(admin, Main.get_access_control_object());
-                this.Menu();
+                Menu();
                 break;
             case 4:
                 Options(current_user_name);

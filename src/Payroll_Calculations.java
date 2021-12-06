@@ -54,36 +54,47 @@ public class Payroll_Calculations extends Copy_of_Admin_Dashboard{
             case 1:
                 process_all_payroll();
                 menu();
+                break;
             case 2:
                 set_suta();
                 menu();
+                break;
             case 3:
                 set_futa();
                 menu();
+                break;
             case 4:
                 set_ss_threshold();
                 menu();
+                break;
             case 5:
                 set_medicare_rate();
                 menu();
+                break;
             case 6:
                 set_social_security_rate();
                 menu();
+                break;
             case 7:
                 add_deduction();
                 menu();
+                break;
             case 8:
                 add_gift();
                 menu();
+                break;
             case 9:
                 delete_deduction();
                 menu();
+                break;
             case 10:
                 delete_gift();
                 menu();
+                break;
             case 11:
                 set_payroll_frequency();
                 menu();
+                break;
             case 12:
                 Menu();
                 break;

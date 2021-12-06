@@ -49,7 +49,6 @@ public class Main {
         System.out.print("Password: ");
         password = scanner.nextLine();
         get_object().Login(username, password);
-        //TODO it appears that any whitespace is added to the username which causes issues
     }
     private static Copy_of_Access_Control get_object() throws InterruptedException, NoSuchAlgorithmException {
         if (!entered && user == null) {

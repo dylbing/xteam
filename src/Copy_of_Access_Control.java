@@ -70,10 +70,9 @@ public class Copy_of_Access_Control {
                 admin.Welcome(user_index);
                 break;
             case "EMPLOYEE":
-                System.out.print("The Employee type works");
                 empl = new Employee_Dashboard(user_index);
                 empl.Menu();
-                //TODO class call break;
+                break;
         }
     }
     public void Options() throws NoSuchAlgorithmException, InterruptedException, IOException {
@@ -82,9 +81,7 @@ public class Copy_of_Access_Control {
     }
     public void Options(String current_user) throws NoSuchAlgorithmException, IOException, InterruptedException {
         System.out.println("You are being directed to your employee dashboard... ");
-        if (empl == null){
-            empl = new Employee_Dashboard(user_index);
-        }
+        empl = new Employee_Dashboard(user_index);
         empl.Menu();
         //Employee emp = new Employee();
     }

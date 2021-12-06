@@ -5,12 +5,12 @@ import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Calendar;
 public class Employee_Dashboard extends Copy_of_Admin_Dashboard{
-    private static int user_index;
+    private int user_index;
     private final int legal_meal_period = 30;
     Employee_Dashboard(int user_index) throws NoSuchAlgorithmException, InterruptedException, IOException {
         super();
-        super.Welcome(user_index);
         this.user_index = user_index;
+        super.Welcome(user_index);
     }
     public void Menu() throws NoSuchAlgorithmException, IOException, InterruptedException {
         int selection;
