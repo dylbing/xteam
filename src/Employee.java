@@ -202,50 +202,54 @@ public class Employee extends Copy_of_Admin_Dashboard{
         float temp_time = 0;
         float hours_worked = 0;
         for (int i = 0; i < punch_log.size(); i++){
-            if (punch_log.get(i).getClass() == LocalDate.class){
-                date = (LocalDate)punch_log.get(i);
-                i++;
-            }
-            if (!Objects.equals(date, end_date)){
-                if ("CLOCK IN".equals(punch_log.get(i))){
+            try{
+                if (punch_log.get(i).getClass() == LocalDate.class){
+                    date = (LocalDate)punch_log.get(i);
                     i++;
-                    clock_in = (LocalTime)punch_log.get(i);
-                    while (!"CLOCK OUT".equals(punch_log.get(i)) && i < punch_log.size())
+                }
+                if (!Objects.equals(date, end_date)){
+                    if ("CLOCK IN".equals(punch_log.get(i))){
                         i++;
-                    if (punch_log.get(i - 1).getClass() == LocalDate.class)
-                        i--;
-                    if ("CLOCK OUT".equals(punch_log.get(i))) {
-                        i++;
-                        clock_out = (LocalTime) punch_log.get(i);
-                        total_time += ChronoUnit.MINUTES.between(clock_out, clock_in);
-                    }
-                    else if (punch_log.get(i).getClass() == LocalDate.class){
-                        i++;
-                        if ("CLOCK OUT".equals(punch_log.get(i))){
+                        clock_in = (LocalTime)punch_log.get(i);
+                        while (!"CLOCK OUT".equals(punch_log.get(i)) && i < punch_log.size())
+                            i++;
+                        if (punch_log.get(i - 1).getClass() == LocalDate.class)
+                            i--;
+                        if ("CLOCK OUT".equals(punch_log.get(i))) {
                             i++;
                             clock_out = (LocalTime) punch_log.get(i);
-                            temp_time += ChronoUnit.MINUTES.between(clock_in, LocalTime.of(23, 59, 59));
-                            temp_time += ChronoUnit.MINUTES.between(LocalTime.of(0, 0, 0), clock_out);
-                            total_time += temp_time;
+                            total_time += ChronoUnit.MINUTES.between(clock_out, clock_in);
+                        }
+                        else if (punch_log.get(i).getClass() == LocalDate.class){
+                            i++;
+                            if ("CLOCK OUT".equals(punch_log.get(i))){
+                                i++;
+                                clock_out = (LocalTime) punch_log.get(i);
+                                temp_time += ChronoUnit.MINUTES.between(clock_in, LocalTime.of(23, 59, 59));
+                                temp_time += ChronoUnit.MINUTES.between(LocalTime.of(0, 0, 0), clock_out);
+                                total_time += temp_time;
+                            }
+                        }
+                    }
+
+                }
+                if (!paid_lunch){
+                    for (int d = 0; d < punch_log.size(); d++){
+                        if ("MEAL START".equals(punch_log.get(d))){
+                            d++;
+                            meal_start = (LocalTime)punch_log.get(d);
+                            d++;
+                            try {
+                                if ("MEAL END".equals((LocalTime)punch_log.get(d))){
+                                    meal_end = (LocalTime)punch_log.get(d);
+                                    total_time -= ChronoUnit.MINUTES.between(meal_start, meal_end);
+                                }
+                            }catch (Exception e){}
                         }
                     }
                 }
-
-            }
-            if (!paid_lunch){
-                for (int d = 0; d < punch_log.size(); d++){
-                    if ("MEAL START".equals(punch_log.get(d))){
-                        d++;
-                        meal_start = (LocalTime)punch_log.get(d);
-                        d++;
-                        try {
-                            if ("MEAL END".equals((LocalTime)punch_log.get(d))){
-                                meal_end = (LocalTime)punch_log.get(d);
-                                total_time -= ChronoUnit.MINUTES.between(meal_start, meal_end);
-                            }
-                        }catch (Exception e){}
-                    }
-                }
+            }catch (Exception e){
+                System.err.println("At least one employee has not completed all punches for this pay period. Therefore, pay cannot be computed for this individual");
             }
         }
         total_time = total_time / 60;
